@@ -1,36 +1,39 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const _ = require('lodash');
-
-const {mongoose} = require('../db/mongoose');
-const {Recipe} = require('../models/recipe');
 const {ObjectID} = require('mongodb');
 
+const {mongoose} = require('./db/mongoose');
+const {Recipe} = require('./models/recipe');
+
 var app = express();
+
 app.use(bodyParser.json());
+app.use(cors());
 
 const port = process.env.PORT || 3000;
 
 app.get('/recipe', (req, res) => {
-    Recipe.find().then((recipes) => {
-        if (!recipes) {
-            res.status(404).send();
-        }
+    if (req.query.ingredients){
+        let ingredients = req.query.ingredients.map(x => JSON.parse(x).name);
 
-        res.status(200).send(recipes);
-    }, (e) => {
-        res.status(400).send();
-    })
+        Recipe.find({ingredients: {$in: ingredients}}).then((recipes) => {
+            console.log("recipes" + recipes);
+            if (!recipes) {
+                res.status(404).send();
+            }
+            res.status(200).send(recipes);
+        }, (e) => {
+            res.status(400).send();
+        })
+    }
 });
 
-app.get('/recipe/:id', (req, res) => {
-    let id = req.params.id;
+app.get('/recipe/:title', (req, res) => {
+    let title = req.params.title;
 
-    if(!ObjectID.isValid(id)){
-        return res.status(400).send();
-    }
-
-    Recipe.findById(id).then((recipe) => {
+    Recipe.findOne({title}).then((recipe) => {
         if (!recipe) {
             res.status(404).send();
         }
