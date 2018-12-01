@@ -19,42 +19,45 @@ const port = process.env.PORT || 3000;
 
 app.get('/recipe', (req, res) => {
     if (req.query.ingredients) {
+        let ingredientsArr = req.query.ingredients.map(ingredient => JSON.parse(ingredient).name);
+
         let ingredientMap = req.query.ingredients.map(x =>
-        Recipe.find({ingredients: {$regex: new RegExp(JSON.parse(x).name)}}));
+            Recipe.find({ingredients: {$regex: new RegExp(JSON.parse(x).name)}}));
 
         return Promise.all(ingredientMap).then((results) => {
             if (!results) {
-            res.status(404).send();
-        }
-        let filteredResults = results.filter(x => {
-            return typeof x !== 'undefined' ? x[0] : null
-        });
+                res.status(404).send();
+            }
+            let filteredResults = results.filter(x => {
+                return typeof x !== 'undefined' ? x[0] : null
+            });
 
-        let merged = [].concat.apply([], filteredResults);
+            let merged = [].concat.apply([], filteredResults);
 
-        res.status(200).send(merged);
+            let final = merged.filter(recipe => {
+                let includes = true;
+                //loop every ingredient and search in recipe.ingredients
+                ingredientsArr.forEach(ingredient => {
+                    if(!recipe.ingredients.toString().includes(ingredient)) {
+                        console.log("didnt find");
+                        includes = false;
+                    }
+                });
+
+                return includes ? recipe : '';
+            });
+
+            final = _.uniqBy(final, function (e) {
+                return e.id;
+            });
+
+            res.status(200).send(final);
         }).catch( e => {
             res.status(400).send();
         })
     }
 });
 
-// app.get('/recipe', (req, res) => {
-//     if (req.query.ingredients){
-//         let ingredients = req.query.ingredients.map(x => JSON.parse(x).name);
-//
-//         // find any document to include in its ingredients list a substring of any of the elements in the ingredients array
-//         Recipe.find({ingredients: {$in: ingredients}}).then((recipes) => {
-//             console.log("recipes" + recipes);
-//             if (!recipes) {
-//                 res.status(404).send();
-//             }
-//             res.status(200).send(recipes);
-//         }, (e) => {
-//             res.status(400).send();
-//         })
-//     }
-// });
 
 app.get('/recipe/:title', (req, res) => {
     let title = req.params.title;

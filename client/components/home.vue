@@ -10,24 +10,22 @@
                                 @change="addIngredient"
                                 v-model="search"
                                 placeholder="Insert Ingredient"></v-text-field>
+                      <div id="basket"  v-if="ingredients.length > 0">
+                          <ul class="ingredients-list">
+                              <li v-for="(item, i) in ingredients" :key="item.name">
+                                  <v-chip close v-model="item.stat" @input="removeIngredient(item)">
+                                      {{ item.name }}<br>
+                                  </v-chip>
+                              </li>
+                          </ul>
+                      </div>
                   </div>
               </div>
               <div class="col-lg-8">
               </div>
           </div>
           <div class="row justify-left top0">
-              <div class="col-lg-3 app-sidebar">
-                  <div id="basket"  v-if="ingredients.length > 0">
-                      <ul class="ingredients-list">
-                          <li v-for="(item, i) in ingredients" :key="item.name">
-                              <v-chip close v-model="item.stat" @input="removeIngredient(item)">
-                                  {{ item.name }}<br>
-                              </v-chip>
-                          </li>
-                      </ul>
-                  </div>
-              </div>
-              <div class="col-lg-8">
+              <div class="col-lg-12">
                   <recipe-list :recipes="recipes"></recipe-list>
               </div>
           </div>
