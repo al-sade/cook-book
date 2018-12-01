@@ -1,35 +1,47 @@
 <template>
   <div class="home">
-    <h1>Ingredients Driven Cook Book</h1>
       <div class="container-fluid">
-          <div class="row">
-              <div class="col-lg-6 offset-lg-3" >
-                  <v-text-field clearable append-icon="search" @change="addIngredient" v-model="search"></v-text-field>
-                  <div class="alert" v-if="ingredients.length == 0">Insert at least one ingredient...</div>
-                  <div id="basket">
-                      <v-chip close v-for="(item, i) in ingredients" :key="item.name" v-model="item.stat" @input="ingredientRemoved(item)">
-                          {{ item.name }}
-                      </v-chip>
+          <div class="row top10 row-padded">
+              <div class="col-lg-4 justify-left">
+                  <div style="display: inline-flex;">
+                  <v-text-field clearable
+                                class="search"
+                                append-icon="search"
+                                @change="addIngredient"
+                                v-model="search"
+                                placeholder="Insert Ingredient"></v-text-field>
                   </div>
-                  <v-btn @click="onSubmit">Search</v-btn>
               </div>
-
-          </div>
-
-          <div class="row">
-              <div class="col-lg-6">
-                  <router-link v-for="recipe in recipes" :key="recipe.title" :to="{path: `recipe/${recipe.title}`}">
-                      <a>{{recipe.title}}</a>
-                  </router-link>
+              <div class="col-lg-8">
               </div>
           </div>
-
+          <div class="row justify-left top0">
+              <div class="col-lg-3 app-sidebar">
+                  <div id="basket"  v-if="ingredients.length > 0">
+                      <ul class="ingredients-list">
+                          <li v-for="(item, i) in ingredients" :key="item.name">
+                              <v-chip close v-model="item.stat" @input="removeIngredient(item)">
+                                  {{ item.name }}<br>
+                              </v-chip>
+                          </li>
+                      </ul>
+                  </div>
+              </div>
+              <div class="col-lg-8">
+                  <recipe-list :recipes="recipes"></recipe-list>
+              </div>
+          </div>
       </div>
   </div>
 </template>
 
 <script>
+    import recipeList from './RecipesList.vue'
+
     export default {
+        components: {
+            recipeList
+        },
       data () {
         return {
             msg: 'Welcome to ingredients based cook book',
@@ -40,12 +52,13 @@
       },
       methods: {
           addIngredient ($event) {
-          if(!this.ingredients.map(x => x.name.toLowerCase()).includes($event.toLowerCase())){
-              this.ingredients.push({name: $event, stat: true})
+          if($event.length && !this.ingredients.map(x => x.name.toLowerCase()).includes($event.toLowerCase())){
+              this.ingredients.push({name: $event, stat: true});
+              this.getRecipes();
           }
           this.search = ''
         },
-        onSubmit ($event) {
+        getRecipes () {
             this.axios.get('/recipe', {
                 params: {
                     ingredients: this.ingredients
@@ -56,9 +69,13 @@
                 }
             }).catch(e => console.log(e));
         },
-        ingredientRemoved($event){
-          this.ingredients = this.ingredients.filter(item => item.name !== $event.name);
-        //              this.ingredients.filter(item)
+        removeIngredient($event){
+              this.ingredients = this.ingredients.filter(item => item.name.search($event.name));
+              this.recipes = this.recipes.filter(x => {
+                  !x.ingredients.toString().includes($event.name)
+              });
+
+            this.getRecipes();
         }
       }
     }
@@ -66,5 +83,25 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+    #basket {
+        padding: 10px;
+        display: -webkit-inline-box;
+        float: left;
+    }
+
+    .search{
+        margin: 0 25px;
+    }
+
+    .ingredients-list {
+        list-style: none;
+    }
+    .ingredients-list li{
+        min-width:100%;
+    }
+
+    span.v-chip {
+        float: left;
+    }
 
 </style>

@@ -1,7 +1,7 @@
 <template>
     <div class="row">
         <div class="col-lg-6 offset-lg-3">
-
+            <button @click="goBack()">go  Back</button>
             <h2>{{item.title}}</h2>
             <ul>
                 <li v-for="step in item.instructions">{{ step }}</li>
@@ -27,6 +27,13 @@
         data () {
             return {
                 item: {}
+            }
+        },
+        methods: {
+            goBack () {
+                window.history.length > 1
+                    ? this.$router.go(-1)
+                    : this.$router.push('/')
             }
         }
     }

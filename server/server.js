@@ -2,6 +2,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const _ = require('lodash');
+const multer  = require('multer');
+var upload = multer({ dest: 'uploads/' });
+
 const {ObjectID} = require('mongodb');
 
 const {mongoose} = require('./db/mongoose');
@@ -15,20 +18,43 @@ app.use(cors());
 const port = process.env.PORT || 3000;
 
 app.get('/recipe', (req, res) => {
-    if (req.query.ingredients){
-        let ingredients = req.query.ingredients.map(x => JSON.parse(x).name);
+    if (req.query.ingredients) {
+        let ingredientMap = req.query.ingredients.map(x =>
+        Recipe.find({ingredients: {$regex: new RegExp(JSON.parse(x).name)}}));
 
-        Recipe.find({ingredients: {$in: ingredients}}).then((recipes) => {
-            console.log("recipes" + recipes);
-            if (!recipes) {
-                res.status(404).send();
-            }
-            res.status(200).send(recipes);
-        }, (e) => {
+        return Promise.all(ingredientMap).then((results) => {
+            if (!results) {
+            res.status(404).send();
+        }
+        let filteredResults = results.filter(x => {
+            return typeof x !== 'undefined' ? x[0] : null
+        });
+
+        let merged = [].concat.apply([], filteredResults);
+
+        res.status(200).send(merged);
+        }).catch( e => {
             res.status(400).send();
         })
     }
 });
+
+// app.get('/recipe', (req, res) => {
+//     if (req.query.ingredients){
+//         let ingredients = req.query.ingredients.map(x => JSON.parse(x).name);
+//
+//         // find any document to include in its ingredients list a substring of any of the elements in the ingredients array
+//         Recipe.find({ingredients: {$in: ingredients}}).then((recipes) => {
+//             console.log("recipes" + recipes);
+//             if (!recipes) {
+//                 res.status(404).send();
+//             }
+//             res.status(200).send(recipes);
+//         }, (e) => {
+//             res.status(400).send();
+//         })
+//     }
+// });
 
 app.get('/recipe/:title', (req, res) => {
     let title = req.params.title;
