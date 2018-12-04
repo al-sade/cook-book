@@ -3,6 +3,10 @@ html, body, row-height {
     height: 100%;
 }
 
+ul {
+    list-style: none;
+    padding: 5px;
+}
 .row {
     margin-top: 30px;
 }
@@ -23,3 +27,4 @@ html, body, row-height {
 .app-sidebar {
     background: beige;
 }
+

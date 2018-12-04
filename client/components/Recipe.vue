@@ -1,16 +1,33 @@
 <template>
-    <div class="row">
-        <div class="col-lg-6 offset-lg-3">
-            <button @click="goBack()">go  Back</button>
-            <h2>{{item.title}}</h2>
+    <div class="container">
+        <button @click="goBack()">< Back</button>
+        <div class="row app-info">
+        <div class="col-lg-9 justify-content-left">
+            <h1>{{item.title}}</h1>
+            <v-chip v-for="tag in item.tags" :key="tag">{{tag}}</v-chip>
             <ul>
-                <li v-for="step in item.instructions">{{ step }}</li>
-            </ul>
-            <h1>Ingredients</h1>
-            <ul>
-                <li v-for="item in item.ingredients">{{ item }}</li>
+                <li>Level: {{ item.level }}</li>
+                <li>Time: {{ item.time }}</li>
             </ul>
         </div>
+        <div class="col-lg-3">
+            <v-img :src="'https://' + item.img"></v-img>
+        </div>
+    </div>
+    <div class="row app-info">
+        <div class="col-lg-6">
+            <h2>Ingredients</h2>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item" v-for="item in item.ingredients">{{ item }}</li>
+            </ul>
+        </div>
+        <div class="col-lg-6">
+            <h2>Instructions</h2>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item" v-for="step in item.instructions">{{ step }}</li>
+            </ul>
+        </div>
+    </div>
     </div>
 </template>
 
@@ -40,5 +57,12 @@
 </script>
 
 <style scoped>
+    .app-info {
+        background: #faebd7;
+        padding: 25px;
+    }
 
+    h3{
+        float: left;
+    }
 </style>

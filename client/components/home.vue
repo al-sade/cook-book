@@ -93,9 +93,7 @@
 
     .ingredients-list {
         list-style: none;
-    }
-    .ingredients-list li{
-        min-width:100%;
+        display: inline-flex;
     }
 
     span.v-chip {

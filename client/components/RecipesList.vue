@@ -1,16 +1,16 @@
 <template>
     <div class="container-fluid">
         <div class="row top0" v-if="recipes.length > 0">
-            <div class="col-lg-6">
-                <!--<p v-for="recipe in recipes">{{recipe[0]}}</p>-->
-                <v-card v-for="recipe in recipes" :key="recipe.title" width="200">
+            <div class="col-lg-12">
+                <v-card v-for="(recipe,i) in recipes" :key="i" width="200" height="200">
                     <router-link :to="{path: `recipe/${recipe.title}`}">
-                        <v-img :src="require('../assets/images/foodpic.jpg')" aspect-ratio="2.75"></v-img>
+                        <v-img v-if="typeof recipe.img !== 'undefined' " :src="'http://' + recipe.img" aspect-ratio="2.75"></v-img>
+                        <v-img v-else :src="'http://fill-image.jobs160.com/300x200'" aspect-ratio="2.75"></v-img>
                     </router-link>
                     <v-card-title primary-title>
                         <div>
                             <router-link :to="{path: `recipe/${recipe.title}`}">
-                                {{ recipe.title }}
+                                {{ recipe.title | shortened }}
                             </router-link>
                         </div>
                     </v-card-title>
@@ -28,9 +28,9 @@
 <script>
     export default {
         props: ['recipes'],
-        data() {
-            return {
-
+        filters: {
+            shortened (value) {
+                return value.length > 40 ? value.substring(0, 40) + '...' : value;
             }
         }
     }
